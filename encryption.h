@@ -192,7 +192,8 @@ char *encodeBase64(char str[])
 
 char *decodeBase64(char str[])
 {
-    
+    char * c;
+    return c;
 }
 
 void encryption(char str[])
