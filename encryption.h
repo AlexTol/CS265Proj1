@@ -108,6 +108,32 @@ void intArrCpy(int *targ,int *source,int size)
     }
 }
 
+char *asciiToHex(char str[],int len)
+{
+    char *newArr = malloc(len * 2);
+    for(int i = 0, j = 0;i < len;i++, j +=2)
+    {
+        sprintf(newArr + j,"%02x",str[i] & 0xff);
+    }
+
+    return newArr;
+}
+
+char *hexToAscii(char str[],int len)
+{
+    char *newArr = malloc((len / 2)+1);
+
+    for(int i = 0, j = 0; j < len; i++, j += 2)
+    {
+        int val[1]; //this needs to be an array since it matches with the int[] type not int type
+        sscanf(str + j,"%2x",val);
+        newArr[i] = val[0];
+    }
+    newArr[len/2] ='\0';
+
+    return newArr;
+}
+
 //instead of using the buffs , copy them into arrays using intArrCpy
 char *encodeBase64(char str[])
 {
@@ -167,12 +193,6 @@ char *encodeBase64(char str[])
         int padStr[24];
         intArrCpy(padStr,temp3,24);
         free(temp3);
-
-        for(int j=0; j < 24; j++)
-        {
-            printf("%d",padStr[j]);
-        }
-        printf("\n");
 
         int group1[6];
         int group2[6];
@@ -310,12 +330,6 @@ char *decodeBase64(char str[])
         intArrCpy(padStr,temp5,24);
         free(temp5);
 
-        for(int j=0; j < 24; j++)
-        {
-            printf("%d",padStr[j]);
-        }
-        printf("\n");
-
         int group1[8];
         int group2[8];
         int group3[8];
@@ -350,11 +364,13 @@ char *decodeBase64(char str[])
         int val3 = binArrToDec(group3,8);
 
         newStr[pos] = val1;
-        newStr[pos+1] = (ignore3  == 1) ? ' ' : val2;
-        newStr[pos+2] = (ignore4  == 1) ? ' ' : val3;
+        newStr[pos+1] = (ignore3  == 1) ? '\0' : val2;
+        newStr[pos+2] = (ignore4  == 1) ? '\0' : val3;
 
         pos +=3;
     }
+    newStr[regSize] = '\0';
+
     return newStr;
 }
 
