@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h> //need gcc main.c -lm   to link math library
 
@@ -17,7 +19,7 @@ int base64EncodeSize(char str[])
 
 int * decToBin(int d, int size)
 {
-    int *bin = malloc(sizeof(int) * size);
+    int *bin = (int *)malloc(sizeof(int) * size);
     
     int mNum = d;
     int spot = size-1;
@@ -41,7 +43,7 @@ int * decToBin(int d, int size)
 
 int * charToBin(char c,int size)
 {
-        int *bin = malloc(sizeof(int) * size);
+        int *bin = (int *)malloc(sizeof(int) * size);
         for(int i = 0; i < size; i++)
         {
             bin[i] = ( ((c << i) & 128)/128);
@@ -83,7 +85,7 @@ int binArrToDec(int *bin,int len)
 
 int * concatArrs(int *arr1,int *arr2,int size1,int size2)
 {
-    int *newArr = malloc(sizeof(int) * (size1+size2));
+    int *newArr = (int *) malloc(sizeof(int) * (size1+size2));
     for(int i=0; i < size1;i++)
     {
         newArr[i] = arr1[i];
@@ -110,7 +112,7 @@ void intArrCpy(int *targ,int *source,int size)
 
 char *asciiToHex(char str[],int len)
 {
-    char *newArr = malloc(len * 2);
+    char *newArr = (char *)malloc(len * 2);
     for(int i = 0, j = 0;i < len;i++, j +=2)
     {
         sprintf(newArr + j,"%02x",str[i] & 0xff);
@@ -121,7 +123,7 @@ char *asciiToHex(char str[],int len)
 
 char *hexToAscii(char str[],int len)
 {
-    char *newArr = malloc((len / 2)+1);
+    char *newArr = (char *)malloc((len / 2)+1);
 
     for(int i = 0, j = 0; j < len; i++, j += 2)
     {
@@ -139,7 +141,7 @@ char *encodeBase64(char str[])
 {
     const char base64tab[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     int base64Size = base64EncodeSize(str);
-    char *newStr = malloc(base64Size+1);
+    char *newStr = (char*) malloc(base64Size+1);
 
     int pos = 0;
     for(int i = 0; i < strlen(str); i = i + 3)
@@ -266,7 +268,7 @@ int returnSpace(char c)
 char *decodeBase64(char str[])
 {
     int regSize = base64DecodeSize(str);
-    char *newStr = malloc(regSize+1);
+    char *newStr = (char*)malloc(regSize+1);
 
 
     int pos = 0;

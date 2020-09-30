@@ -4,7 +4,7 @@
 // compile with gcc main.c -lm -lgmp / clang main.c -lm -lgmp -o main
 //
 //local
-//#include "encryption.h"
+#include "encryption.h"
 #include "cryptanalysis.h"
 
 
@@ -46,6 +46,22 @@ int main (int argc, char *argv[])
 
     mpz_t M;
     calculateM(M, N1, N2, N3, c1, c2, c3);
+    printf("M is: ");
+    mpz_out_str(NULL, 16, M);
+    char* M_str;
+    M_str = mpz_get_str(NULL, 16, M);
+    int len = strlen(M_str);
+    
+    printf("\n");
+    printf("Length: %d \n", len);
+    printf("Message is: ");
+    char * M_ascii = hexToAscii(M_str, len);
+    char * raw_M = decodeBase64(M_ascii);
+    for (int i=0; i< strlen(raw_M); i++){
+        printf("%c",raw_M[i]);
+        
+    }
+    printf("\n");
     //printf("%s\n",str);
     //mpz_clears(M, N1, N2, N3, c1, c2, c3);
     mpz_clear(gcd12);
@@ -151,11 +167,13 @@ void calculateM(mpz_t M, mpz_t N1, mpz_t N2,mpz_t N3, mpz_t c1, mpz_t c2, mpz_t 
 
     exact = mpz_root(M, temp, 3);
     printf("Exact root: %d\n", exact);
+    /*
     printf("M is: ");
     mpz_out_str(NULL, 10, M);
     printf("\n");
     
-    /*
+    
+    
     mpz_cdiv_q(M, X, BigN);
     mpz_mul(temp, M, BigN);
     mpz_sub(M, X, temp);
