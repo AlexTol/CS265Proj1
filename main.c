@@ -58,15 +58,21 @@ int main (int argc, char *argv[])
     char * M_ascii = hexToAscii(M_str, len);
     printf("Message in base64 is: ");
     for (int i=0; i< strlen(M_ascii); i++){
-        printf("%c",M_ascii[i]);
-        
+        printf("%c",M_ascii[i]);   
     }
     printf("\n");
     char * raw_M = decodeBase64(M_ascii);
     printf("Message is: ");
     for (int i=0; i< strlen(raw_M); i++){
-        printf("%c",raw_M[i]);
-        
+        printf("%c",raw_M[i]);  
+    }
+    printf("\n");
+    // Test encodebase 64
+    char * M_ger = "Einladung zu meiner Geburtstagsparty. Die Party findet am 20.12.2012 in Bletchley statt.";
+    char * M_base64 = encodeBase64(M_ger);
+    printf("Message in base64 is: ");
+    for (int i=0; i< strlen(M_base64); i++){
+        printf("%c",M_base64[i]);   
     }
     printf("\n");
     //printf("%s\n",str);

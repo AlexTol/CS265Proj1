@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h> //need gcc main.c -lm   to link math library
-
+//Invitation to my birthday party. The party will take place on December 20th, 2012 in Bletchley.
 int base64DecodeSize(char str[])
 {
     int len = strlen(str);
@@ -124,7 +124,7 @@ char *asciiToHex(char str[],int len)
 char *hexToAscii(char str[],int len)
 {
     char *newArr = (char *)malloc((len / 2)+1);
-
+    int base = 64;
     for(int i = 0, j = 0; j < len; i++, j += 2)
     {
         int val[1]; //this needs to be an array since it matches with the int[] type not int type
@@ -259,6 +259,9 @@ int returnSpace(char c)
         if(c == base64tab[i])
         {
             return i;
+        } else if (c == '\n'){
+            printf("Hi");
+            return 65; 
         }
     }
 
@@ -274,6 +277,13 @@ char *decodeBase64(char str[])
     int pos = 0;
     for(int i = 0; i < strlen(str); i = i + 4)
     {
+        //remove new line
+        for(int j = i; j<i+4; j++){
+            if(str[j] == '\n'){
+                i=j+1;
+                continue;
+            }
+        }
         int s1 = returnSpace(str[i]);
         int s2 = returnSpace(str[i+1]);
         int s3 = returnSpace(str[i+2]);
