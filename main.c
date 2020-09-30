@@ -54,9 +54,16 @@ int main (int argc, char *argv[])
     
     printf("\n");
     printf("Length: %d \n", len);
-    printf("Message is: ");
+    
     char * M_ascii = hexToAscii(M_str, len);
+    printf("Message in base64 is: ");
+    for (int i=0; i< strlen(M_ascii); i++){
+        printf("%c",M_ascii[i]);
+        
+    }
+    printf("\n");
     char * raw_M = decodeBase64(M_ascii);
+    printf("Message is: ");
     for (int i=0; i< strlen(raw_M); i++){
         printf("%c",raw_M[i]);
         
@@ -64,6 +71,9 @@ int main (int argc, char *argv[])
     printf("\n");
     //printf("%s\n",str);
     //mpz_clears(M, N1, N2, N3, c1, c2, c3);
+    free(raw_M);
+    free(M_ascii);
+    free(M_str);
     mpz_clear(gcd12);
     mpz_clear(gcd13);
     mpz_clear(gcd23);

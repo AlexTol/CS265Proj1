@@ -379,5 +379,7 @@ char *decodeBase64(char str[])
 //todo rename this to decryption
 void encryption(char str[])
 {
+    char * M = "Einladung zu meiner Geburtstagsparty. Die Party findet am 20.12.2012 in Bletchley statt.";
+
 
 }
