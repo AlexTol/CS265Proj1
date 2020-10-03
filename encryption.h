@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gmp.h>
 #include <math.h> //need gcc main.c -lm   to link math library
 //Invitation to my birthday party. The party will take place on December 20th, 2012 in Bletchley.
 int base64DecodeSize(char str[])
@@ -135,6 +136,24 @@ char *hexToAscii(char str[],int len)
 
     return newArr;
 }
+
+void hexToInt(mpz_t val,char hex[])
+{
+    mpz_set_str(val,hex,16);
+}
+
+char *intToHex(mpz_t val,int size)
+{
+    char *newStr = (char*) malloc(size+1);
+    mpz_get_str (newStr, 16, val);
+    return newStr;
+}
+
+/*char *intToHex(long int num)
+{
+    char *hex = (char *)malloc(100);
+    
+}*/
 
 //instead of using the buffs , copy them into arrays using intArrCpy
 char *encodeBase64(char str[])
@@ -277,13 +296,6 @@ char *decodeBase64(char str[])
     int pos = 0;
     for(int i = 0; i < strlen(str); i = i + 4)
     {
-        //remove new line
-        for(int j = i; j<i+4; j++){
-            if(str[j] == '\n'){
-                i=j+1;
-                continue;
-            }
-        }
         int s1 = returnSpace(str[i]);
         int s2 = returnSpace(str[i+1]);
         int s3 = returnSpace(str[i+2]);
