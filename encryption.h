@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "stringHelper.h"
 #include <gmp.h>
 #include <math.h> //need gcc main.c -lm   to link math library
 //Invitation to my birthday party. The party will take place on December 20th, 2012 in Bletchley.
@@ -399,9 +400,52 @@ char *decodeBase64(char str[])
 }
 
 //todo rename this to decryption
-void encryption(char str[])
+void encryption(char str[],mpz_t ret,char *eStr,char *NStr)
 {
-    char * M = "Einladung zu meiner Geburtstagsparty. Die Party findet am 20.12.2012 in Bletchley statt.";
+    char *buf1;
+    buf1 = stripNewLine(str);
 
+    char *buf2;
+    buf2 = encodeBase64(buf1);
+    int len = base64EncodeSize(buf1);
+    free(buf1);
 
+    char *hex;
+    hex = asciiToHex(buf2,len);
+    free(buf2);
+
+    hexToInt(ret,hex);
+    mpz_t e,N,base;
+    mpz_init(e);
+    mpz_init(N);
+    mpz_init(base);
+    mpz_set_str(e, eStr,10);
+    mpz_set_str(N, NStr,10);
+    mpz_set_str(base, "10",10);
+    mpz_powm(ret,ret,e,N);
+}
+
+void decryption(mpz_t val,char *dStr,char *NStr)
+{
+    mpz_t d,N;
+    mpz_init(d);
+    mpz_init(N);
+    mpz_set_str(d, dStr,10);
+    mpz_set_str(N, NStr,10);
+    mpz_powm(val,val,d,N);
+    gmp_printf("gmp: %Zd \n", val);
+}
+
+char *decryptionTrunc(mpz_t val,int len)
+{
+    char *newHex = intToHex(val,2 * len);
+
+    char *ascii;
+    ascii = hexToAscii(newHex,len);
+    free(newHex);
+
+    char *str = decodeBase64(ascii);
+    free(ascii);
+
+    return str;
 }
