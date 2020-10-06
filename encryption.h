@@ -279,10 +279,7 @@ int returnSpace(char c)
         if(c == base64tab[i])
         {
             return i;
-        } else if (c == '\n'){
-            printf("Hi");
-            return 65; 
-        }
+        } 
     }
 
     return -1;
