@@ -85,9 +85,8 @@ int binArrToDec(int *bin,int len)
     return val;
 }
 
-int * concatArrs(int *arr1,int *arr2,int size1,int size2)
+void concatArrs(int newArr[],int *arr1,int *arr2,int size1,int size2)
 {
-    int *newArr = (int *) malloc(sizeof(int) * (size1+size2));
     for(int i=0; i < size1;i++)
     {
         newArr[i] = arr1[i];
@@ -100,7 +99,6 @@ int * concatArrs(int *arr1,int *arr2,int size1,int size2)
         counter++;
     }
 
-    return newArr;
 }
 
 //todo finish this
@@ -114,7 +112,7 @@ void intArrCpy(int *targ,int *source,int size)
 
 char *asciiToHex(char str[],int len)
 {
-    char *newArr = (char *)malloc(len * 2);
+    char *newArr = (char *)malloc((len * 2)+1);
     for(int i = 0, j = 0;i < len;i++, j +=2)
     {
         sprintf(newArr + j,"%02x",str[i] & 0xff);
@@ -123,19 +121,16 @@ char *asciiToHex(char str[],int len)
     return newArr;
 }
 
-char *hexToAscii(char str[],int len)
+void hexToAscii(char str[],char ascii[],int len)
 {
-    char *newArr = (char *)malloc((len / 2)+1);
     int base = 64;
     for(int i = 0, j = 0; j < len; i++, j += 2)
     {
         int val[1]; //this needs to be an array since it matches with the int[] type not int type
         sscanf(str + j,"%2x",val);
-        newArr[i] = val[0];
+        ascii[i] = val[0];
     }
-    newArr[len/2] ='\0';
-
-    return newArr;
+    ascii[len/2] ='\0';
 }
 
 void hexToInt(mpz_t val,char hex[])
@@ -143,11 +138,9 @@ void hexToInt(mpz_t val,char hex[])
     mpz_set_str(val,hex,16);
 }
 
-char *intToHex(mpz_t val,int size)
+void intToHex(mpz_t val,char hex[])
 {
-    char *newStr = (char*) malloc(size+1);
-    mpz_get_str (newStr, 16, val);
-    return newStr;
+    mpz_get_str(hex, 16, val);
 }
 
 /*char *intToHex(long int num)
@@ -161,7 +154,7 @@ char *encodeBase64(char str[])
 {
     const char base64tab[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     int base64Size = base64EncodeSize(str);
-    char *newStr = (char*) malloc(base64Size+1);
+    char *newStr = (char*)malloc(base64Size+1);
 
     int pos = 0;
     for(int i = 0; i < strlen(str); i = i + 3)
@@ -176,7 +169,7 @@ char *encodeBase64(char str[])
         buf1 = charToBin(str[i],8);
         int pad1[8];
         intArrCpy(pad1,buf1,8);
-        //free(buf1);
+        free(buf1);
 
         if(i + 1 > strlen(str) - 1)
         {
@@ -190,7 +183,10 @@ char *encodeBase64(char str[])
 
         int pad2[8];
         intArrCpy(pad2,buf2,8);
-        //free(buf2);
+        if(zeroOnTwo == 0)
+        {
+            free(buf2);
+        }
 
         if(i + 2 > strlen(str) - 1)
         {
@@ -204,17 +200,20 @@ char *encodeBase64(char str[])
 
         int pad3[8];
         intArrCpy(pad3,buf3,8);
-        //free(buf3);
+        if(zeroOnThree == 0)
+        {
+            free(buf3);
+        }
 
-        int *temp1 = concatArrs(pad1,pad2,8,8);
         int  temp2[16];
-        intArrCpy(temp2,temp1,16);
-        free(temp1);
+        concatArrs(temp2,pad1,pad2,8,8);
+        //intArrCpy(temp2,temp1,16);
+        //free(temp1);
 
-        int *temp3 = concatArrs(temp2,pad3,16,8);
         int padStr[24];
-        intArrCpy(padStr,temp3,24);
-        free(temp3);
+        concatArrs(padStr,temp2,pad3,16,8);
+        //intArrCpy(padStr,temp3,24);
+        //free(temp3);
 
         int group1[6];
         int group2[6];
@@ -285,11 +284,9 @@ int returnSpace(char c)
     return -1;
 }
 
-char *decodeBase64(char str[])
+void decodeBase64(char str[],char newStr[],int regSize)
 {
-    int regSize = base64DecodeSize(str);
-    char *newStr = (char*)malloc(regSize+1);
-
+    regSize += 1;
 
     int pos = 0;
     for(int i = 0; i < strlen(str); i = i + 4)
@@ -310,10 +307,12 @@ char *decodeBase64(char str[])
         buf1 = decToBin((char) s1,6);
         int pad1[6];
         intArrCpy(pad1,buf1,6);
+        free(buf1);
 
         buf2 = decToBin(s2,6);
         int pad2[6];
         intArrCpy(pad2,buf2,6);
+        free(buf2);
 
         int pad3[6];
         if(s3 == -1)
@@ -324,8 +323,8 @@ char *decodeBase64(char str[])
         {
             buf3 = decToBin(s3,6);
             intArrCpy(pad3,buf3,6);
+            free(buf3);
         }
-
         int pad4[6];
         if(s4 == -1)
         {
@@ -335,22 +334,23 @@ char *decodeBase64(char str[])
         {
             buf4 = decToBin(s4,6);
             intArrCpy(pad4,buf4,6);
+            free(buf4);
         }
 
-        int *temp1 = concatArrs(pad1,pad2,6,6);
         int  temp2[12];
-        intArrCpy(temp2,temp1,12);
-        free(temp1);
+        concatArrs(temp2,pad1,pad2,6,6);
+        //intArrCpy(temp2,temp1,12);
+        //free(temp1);
 
-        int *temp3 = concatArrs(temp2,pad3,12,6);
         int temp4[18];
-        intArrCpy(temp4,temp3,18);
-        free(temp3);
+        concatArrs(temp4,temp2,pad3,12,6);
+        //intArrCpy(temp4,temp3,18);
+        //free(temp3);
 
-        int *temp5 = concatArrs(temp4,pad4,18,6);
         int padStr[24];
-        intArrCpy(padStr,temp5,24);
-        free(temp5);
+        concatArrs(padStr,temp4,pad4,18,6);
+        //intArrCpy(padStr,temp5,24);
+        //free(temp5);
 
         int group1[8];
         int group2[8];
@@ -393,7 +393,6 @@ char *decodeBase64(char str[])
     }
     newStr[regSize] = '\0';
 
-    return newStr;
 }
 
 //todo rename this to decryption
@@ -405,21 +404,26 @@ void encryption(char str[],mpz_t ret,char *eStr,char *NStr)
     char *buf2;
     buf2 = encodeBase64(buf1);
     int len = base64EncodeSize(buf1);
-    free(buf1);
 
     char *hex;
     hex = asciiToHex(buf2,len);
-    free(buf2);
+    //printf("%s\n",hex);
 
     hexToInt(ret,hex);
-    mpz_t e,N,base;
+    mpz_t e,N;
     mpz_init(e);
     mpz_init(N);
-    mpz_init(base);
     mpz_set_str(e, eStr,10);
     mpz_set_str(N, NStr,10);
-    mpz_set_str(base, "10",10);
+    //gmp_printf("gmp: %Zd \n", ret);
     mpz_powm(ret,ret,e,N);
+
+    free(buf1);
+    free(buf2);
+    free(hex);
+    mpz_clear(e);
+    mpz_clear(N);
+    gmp_printf("Encryption Result: %Zd \n", ret);
 }
 
 void decryption(mpz_t val,char *dStr,char *NStr)
@@ -430,19 +434,29 @@ void decryption(mpz_t val,char *dStr,char *NStr)
     mpz_set_str(d, dStr,10);
     mpz_set_str(N, NStr,10);
     mpz_powm(val,val,d,N);
-    gmp_printf("gmp: %Zd \n", val);
+    //gmp_printf("gmp: %Zd \n", val);
 }
 
 char *decryptionTrunc(mpz_t val,int len)
 {
-    char *newHex = intToHex(val,2 * len);
+    //gmp_printf("gmp2: %Zd \n", val);
+    //printf("here0\n");
+    char newHex[len];
+    intToHex(val,newHex);
+    //printf("%s\n",newHex);
 
-    char *ascii;
-    ascii = hexToAscii(newHex,len);
-    free(newHex);
+    //printf("here1\n");
+    char ascii[len/2+1];
+    hexToAscii(newHex,ascii,len);
+    //printf("%s\n",ascii);
 
-    char *str = decodeBase64(ascii);
-    free(ascii);
+    //printf("here2\n");
+    int regSize = base64DecodeSize(ascii);
+    char str[regSize+1];
+    decodeBase64(ascii,str,regSize);
+    printf("Final Decryption: %s\n",str);
+    char *str2 = str;
 
-    return str;
+
+    return str2;
 }

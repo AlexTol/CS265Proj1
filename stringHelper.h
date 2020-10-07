@@ -25,4 +25,18 @@ char *stripNewLine(char *str)
     return newArr;
 }
 
+int strPointerLen(char *ptr)
+{
+    int count = 0;
+    int pos = 0;
+
+    while(ptr[pos] != '\0')
+    {
+        count++;
+        pos++;
+    }
+
+    return count;
+}
+
 #endif

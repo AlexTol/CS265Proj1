@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gmp.h>
 // compile with gcc main.c -lm -lgmp / clang main.c -lm -lgmp -o main
 //
@@ -11,16 +12,57 @@
 
 int main (int argc, char *argv[]) 
 {   
-    //char *str;
-    //str = encodeBase64("Beispieltext");
-    //int len = base64EncodeSize("Beispieltext");
-    char* M, N1, N2, N3, c1, c2, c3;
-    printf("Start running\n");
+    mpz_t c1,c2,c3,N1,N2,N3,M;
+    mpz_init(c1);
+    mpz_init(c2);
+    mpz_init(c3);
+    mpz_init(N1);
+    mpz_init(N2);
+    mpz_init(N3);
+    mpz_init(M);
+
+    char *message = "Invitation/to/my/birthday/party/The/party/will/take/place/on/December/20th/2012/in/Bletchley";
+    int len1 = strlen(message);
+    char *eStr = "3";
+    char *N1Str = "514745167025222387434132377137056715954750729807151447929894289695587285793889099978536904494455862473045694392353612260528582074521711735864082380505874261026769465596315849668245703081452047808798727647904141791488099702631575692170683102622471798376397440600292225038412176681344166204027842724877162681931";
+    char *N2Str = "332459552799915544356022641605448137617079921391832222557892949808060953028449422328281413629912335051440744955455010851012308918294549765005480121061697711447087615327860789708246235156912421474047484838827777697938563515420810650393553528058831317409340577149233554235346445890238642955390137465511286414033";
+    char *N3Str = "665701912162243069059653781669230805473457427767514323262762891771122352328706695409103713864384833437438648120217615990765220365745013739246022203593234785338178963805463643869398986119431772931646042972240277833431035018628949924813463553419243108837309078316455504749755062865258063926243606206806549969161";
+    mpz_set_str(N1,N1Str,10);
+    mpz_set_str(N2,N2Str,10);
+    mpz_set_str(N3,N3Str,10);
+
+
+    encryption(message,c1,eStr,N1Str);
+    encryption(message,c2,eStr,N2Str);
+    encryption(message,c3,eStr,N3Str);
+
+    printf("\n Encryption Complete. Press Any Key to Continue\n");  
+    getchar(); 
+    
+    calculateM(M,N1,N2,N3,c1,c2,c3);
+
+    //gmp_printf("gmp: %Zd \n", M);
+    char *buffer =(char*) malloc((len1*2)+1);
+    mpz_get_str(buffer,10, M);
+    //printf("gmp to string %s\n",buffer);
+    int len2 = strPointerLen(buffer);
+    free(buffer);
+
+    char *hiddenMessage;
+    hiddenMessage = decryptionTrunc(M,len2);
+    mpz_clear(N1);
+    mpz_clear(N2);
+    mpz_clear(N3);
+    mpz_clear(c1);
+    mpz_clear(c2);
+    mpz_clear(c3);
+    mpz_clear(M);
+
     // call hack with initialized array from cryptanalysis.h
-    hack(M, N1_str, N2_str, N3_str, c1_str, c2_str, c3_str);
+    //hack(M, N1_str, N2_str, N3_str, c1_str, c2_str, c3_str);
 
     //M is returned, action before clear memory
-    free(M);
+    //free(M);
 
 } 
 
@@ -97,89 +139,5 @@ void calculateM(mpz_t M, mpz_t N1, mpz_t N2,mpz_t N3, mpz_t c1, mpz_t c2, mpz_t 
     return;
 }
 
-/*  Take string N1, N2, N3, c1, c2, c3
-    Return string M
-*/
-void hack (char* message, char* N1_s, char* N2_s,char* N3_s,
-    char* c1_s, char* c2_s, char* c3_s){
-    mpz_t N1, N2, N3, c1, c2, c3,
-    gcd12, gcd23 ,gcd13; 
-    
-    //FILE * nullP = NULL;
-    // check if all the parameters are initialize 
-    mpz_inits(N1, N2, N3, c1, c2, c3);
-    
-    mpz_set_str(N1, N1_s,10);
-    mpz_set_str(N2, N2_s,10);
-    mpz_set_str(N3, N3_s,10);
-    mpz_set_str(c1, c1_s,10);
-    mpz_set_str(c2, c2_s,10);
-    mpz_set_str(c3, c3_s,10);
 
-    printf("After initializing big numbers\n");
-    /*
-    free(N1_s);
-    free(N2_s);
-    free(N3_s);
-    free(c1_s);
-    free(c2_s);
-    free(c3_s);
-    */
-    //find 3 greatest common divisors - gcd 
-    //for each pair c1-c2, c1-c3, c2-c3
-
-    mpz_init(gcd12);
-    mpz_gcd (gcd12, N1, N2); 
-    mpz_init(gcd13);
-    printf("Greatest Common Divisor of N1 and N2: ");
-    mpz_out_str(NULL, 10, gcd12);
-    printf("\n");
-
-    mpz_gcd (gcd13, N1, N3); 
-    mpz_init(gcd23);
-    printf("Greatest Common Divisor of N1 and N3: ");
-    mpz_out_str(NULL, 10, gcd13);
-    printf("\n");
-
-    mpz_gcd (gcd23, N2, N3); 
-    printf("Greatest Common Divisor of N2 and N3: ");
-    mpz_out_str(NULL, 10, gcd23);
-    printf("\n");
-
-    mpz_t M;
-    calculateM(M, N1, N2, N3, c1, c2, c3);
-    printf("M in base16 is: ");
-    mpz_out_str(NULL, 16, M);
-    char* M_str;
-    M_str = mpz_get_str(NULL, 16, M);
-    int len = strlen(M_str);
-    
-    printf("\n");
-    char * M_ascii = hexToAscii(M_str, len);
-    printf("Message in base64 is: ");
-    for (int i=0; i< strlen(M_ascii); i++){
-        printf("%c",M_ascii[i]);   
-    }
-    printf("\n");
-    message = decodeBase64(M_ascii);
-    printf("Message is: ");
-    for (int i=0; i< strlen(message); i++){
-        printf("%c",message[i]);  
-    }
-    printf("\n");
-    
-    free(M_ascii);
-    free(M_str);
-    mpz_clear(gcd12);
-    mpz_clear(gcd13);
-    mpz_clear(gcd23);
-    mpz_clear(M);
-    mpz_clear(N1);
-    mpz_clear(N2);
-    mpz_clear(N3);
-    mpz_clear(c1);
-    mpz_clear(c2);
-    mpz_clear(c3);
-    return;
-}
 
